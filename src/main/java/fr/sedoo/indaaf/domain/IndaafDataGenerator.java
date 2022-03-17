@@ -1,6 +1,7 @@
 package fr.sedoo.indaaf.domain;
 
 import java.io.InputStream;
+import java.util.List;
 
 public class IndaafDataGenerator {
 
@@ -21,7 +22,9 @@ public class IndaafDataGenerator {
 	
 	public String generate() throws Exception {
 		Header header = Header.fromInputStream(metadataStream, dataStream, dataSheetIndex, metadataSet);
-		return header.getHeader();
+		String aux =  header.getHeader();
+		String data = String.join("\n", header.getData());
+		return aux+data; 
 	}
 	
 	

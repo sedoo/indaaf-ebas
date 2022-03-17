@@ -8,11 +8,11 @@
 #end_time of measurement, days from the file reference point
 #Analytical measurement technique=ionic chromatography, Analytical instrument manufacturer=THERMO DIONEX, Analytical instrument model=
 ICS-1100 and ICS-5000+
-#Variable= precipitation_amount, mm, Instrument type=precip_gauge, Analytical measurement technique=rain_gauge, Detection limit=0.01 mm, 9.99
+#Variable= precipitation_amount, mm, Instrument type=precip_gauge, Analytical measurement technique=rain_gauge, Detection limit=0.01 mm, 99.99
 #Variable=ammonium, mg N/l, Detection limit=0.01 mg N/l, 9.99
 #Variable=calcium, mg/l, Detection limit=0.01 mg/l, 9.99 
 #Variable=chloride, mg/l, Detection limit=0.01 mg/l, 9.99
-#Variable=conductivity, uS/cm, Analytical measurement technique=conductivity_meter, Analytical instrument manufacturer=WTW, Analytical instrument model=LF358,Detection limit=0.1 uS/cm, 9.99
+#Variable=conductivity, uS/cm, Analytical measurement technique=conductivity_meter, Analytical instrument manufacturer=WTW, Analytical instrument model=LF358,Detection limit=0.1 uS/cm, 99.99
 #Variable=magnesium, mg/l, Detection limit=0.01 mg/l, 9.99
 #Variable=nitrate, mg N/l, Detection limit=0.01 mg N/l, 9.99
 #Variable=pH, pH units, Analytical measurement technique=pH_meter, Analytical instrument manufacturer=ATI ORION, Analytical instrument model=model1350, Detection limit=0.01 pH units, 9.99

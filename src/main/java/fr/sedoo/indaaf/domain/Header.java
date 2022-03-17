@@ -2,6 +2,7 @@ package fr.sedoo.indaaf.domain;
 
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -11,6 +12,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
@@ -34,13 +36,15 @@ public class Header {
 	List<Variable> variables = new ArrayList<>();
 	MetadataSet fileMetadata = new MetadataSet();
 	List<String> dataColumns = new ArrayList<>();
+	List<String> data = new ArrayList<>();
 
 
 
 
 
 	private static final String SEPARATOR =" ";
-
+	
+	
 	public String getHeader() throws Exception {
 		StringBuilder result = new StringBuilder();
 		List<String> lines = new ArrayList<>();
@@ -66,7 +70,7 @@ public class Header {
 
 		result.append(""+(lines.size()+1)+SEPARATOR+"1001\n");
 		result.append(String.join("\n", lines));
-		return result.toString();
+		return result.toString()+"\n";
 	}
 
 	private List<String> variablesToEbas() {
@@ -171,16 +175,73 @@ public class Header {
 
 		try (InputStream is = dataStream; ReadableWorkbook wb = new ReadableWorkbook(is)) {
 			Sheet sheet = wb.getSheet(dataSheetIndex).get();
+			int index =0;
+			List<String> data = new ArrayList<>();
+			String lastDate = "0"; // The first cell is 
 			try (Stream<Row> rows = sheet.openStream()) {
-				Iterator<Row> iterator = rows.iterator();
-				while (iterator.hasNext()) {
-					Row row = (Row) iterator.next();
-					result.setNumberOfVariables(getNumberOfCols(row)+1); //We add endDate as a variable
-					result.setDataColumns(getDataColumnsFromRow(row));
-					break;
-
+				Iterator<Row> rowIterator = rows.iterator();
+				while (rowIterator.hasNext()) {
+					Row row = (Row) rowIterator.next();
+					if (index == 0) {
+						result.setNumberOfVariables(getNumberOfCols(row)+1); //We add endDate as a variable
+						result.setDataColumns(getDataColumnsFromRow(row));
+						index++;
+					}
+					else {
+						Iterator<Cell> iterator = row.iterator();
+						int cellIndex = 0;
+						StringBuilder line = new StringBuilder();
+						while (iterator.hasNext()) {
+							Cell cell = (Cell) iterator.next();
+							if (cellIndex ==0) {
+								
+								String cellContent = cell.getRawValue();
+								if (StringUtils.isEmpty(cellContent)) {
+									continue;
+								} else {
+									LocalDateTime asDate = cell.asDate();
+									Date observationDate = Date.from(asDate.atZone(ZoneId.systemDefault()).toInstant());
+									long diffInMillies = Math.abs(observationDate.getTime() - result.getStartDate().getTime());
+								    long diffInDays = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+									String numberOfDaysSinceStartDate = ""+diffInDays;
+									//Date column
+									line.append(lastDate+" ");
+									line.append(diffInDays);
+									line.append(" ");
+									lastDate = numberOfDaysSinceStartDate;
+								}
+							}
+							else if (cellIndex ==1) {
+								//Empty column, just do nothing
+								
+							}
+							else {
+								if (cellIndex <= result.getNumberOfVariables()) {
+									DecimalFormat df = new DecimalFormat("0.00");
+									String cellContent = cell.getRawValue();
+									if (StringUtils.isEmpty(cellContent)) {
+										line.append(result.getVariables().get(cellIndex-2).getMissingValue());
+									} else {
+									Double aux = new Double(cellContent);
+									line.append(df.format(aux).replace(',', '.'));
+									}
+									line.append(" ");
+								}
+								
+							}
+							
+							cellIndex++;
+							
+							
+						}
+						if (!StringUtils.isEmpty(line.toString().trim())) {
+							data.add(line.toString().trim());
+						}
+					}
 				}
 			}
+			
+			result.setData(data);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -190,6 +251,8 @@ public class Header {
 		}
 		return result;
 	}
+
+	
 
 	private static List<String> getDataColumnsFromRow(Row row) {
 		List<String> result = new ArrayList<>();

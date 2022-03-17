@@ -47,6 +47,7 @@ public class TestGeneration {
 		File folder = new File("/tmp/indaaf");
 		folder.mkdirs();
 		String content = generator.generate();
+		
 		FileUtils.writeStringToFile(new File(folder, fileName), content , Charset.defaultCharset());
 		System.out.println(content);
 //		RestTemplate restTemplate = new RestTemplate();
